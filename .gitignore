@@ -41,3 +41,10 @@ example
 # generated native folders
 /ios
 /android
+
+
+
+
+# directories for dev's configs, created by default
+.claude/
+.vscode/

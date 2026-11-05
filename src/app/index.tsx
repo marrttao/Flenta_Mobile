@@ -1,11 +1,9 @@
-import { Text, View, StyleSheet } from 'react-native';
+import { Redirect } from 'expo-router';
+import { Loading, Page } from '../components/ui';
+import { useAuth } from '../features/auth/providers/AuthProvider';
 
 export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Text>Hello Flenta</Text>
-    </View>
-  );
+  const { user, isRestoringSession } = useAuth();
+  if (isRestoringSession) return <Page title="Flenta"><Loading /></Page>;
+  return <Redirect href={user ? '/banking' : '/auth/sign-in'} />;
 }
-
-const styles = StyleSheet.create({ container: { flex: 1, alignItems: 'center', justifyContent: 'center' }, });

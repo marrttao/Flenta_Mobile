@@ -37,7 +37,7 @@ function TestRouterScreen({ type, name }: TestRouterScreenProps)
 	}
 
 	return (
-		<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+		<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
 			<Page title={name}>
 				<Button title="Home" secondary onPress={() => router.push('/')}/>
 				<Button title="Back" secondary onPress={() => router.back()}/>

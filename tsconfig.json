@@ -3,13 +3,10 @@
   "compilerOptions": {
     "strict": true,
     "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",          // 👈 add this line
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@/assets/*": [
-        "./assets/*"
-      ]
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./assets/*"]
     }
   },
   "include": [

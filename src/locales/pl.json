@@ -1,0 +1,67 @@
+{
+	"testMessage": "To jest wiadomość testowa!",
+
+	"common":
+	{
+		"confirm": "Potwierdź",
+		"cancel": "Anuluj",
+		"close": "Zamknij",
+		"loading": "Ładowanie...",
+		"empty": "Brak danych"
+	},
+
+	"currency":
+	{
+		"title": "Kursy walut",
+		"asOf": "Kurs na dzień",
+		"rates": "Kursy",
+		"myList": "Moja lista",
+		"currency": "Waluta",
+		"buy": "Kup",
+		"sell": "Sprzedaj",
+		"remove": "Usuń",
+		"addCurrency": "Dodaj walutę",
+		"calculator": "Kalkulator kursu krzyżowego",
+		"amount": "Kwota",
+		"loading": "Ładowanie...",
+		"error": "Błąd ładowania",
+		"retry": "Spróbuj ponownie",
+		"confirmOperation": "Potwierdź operację",
+		"cancel": "Anuluj",
+		"operationSuccess": "Operacja zakończona"
+	},
+
+	"theme":
+	{
+		"title": "Motyw",
+		"light": "Jasny",
+		"dark": "Ciemny",
+		"system": "Systemowy"
+	},
+
+	"auth":
+	{
+		"idle":
+		{
+			"title": "Jesteś tu jeszcze?",
+			"description": "Sesja wygaśnie za {seconds} s.",
+			"stay": "Jestem tu",
+			"logout": "Wyloguj"
+		},
+
+		"errors":
+		{
+			"invalid_credentials": "Nieprawidłowy email lub hasło.",
+			"email_not_confirmed": "Potwierdź email, klikając link w wiadomości.",
+			"registration_failed": "Ten email jest już zarejestrowany.",
+			"rate_limited": "Zbyt wiele prób. Spróbuj ponownie za minutę.",
+			"invalid_session": "Sesja jest nieprawidłowa. Zaloguj się ponownie.",
+			"security": "Błąd bezpieczeństwa. Odśwież stronę i spróbuj ponownie.",
+			"password_invalid_length": "Hasło musi mieć 12–128 znaków.",
+			"profile_invalid_name": "Imię musi mieć 1–100 znaków.",
+			"email_invalid": "Nieprawidłowy adres email.",
+			"provider_unavailable": "Usługa uwierzytelniania jest tymczasowo niedostępna. Spróbuj ponownie później.",
+			"generic": "Nie udało się wykonać akcji."
+		}
+	}
+}

@@ -1,0 +1,67 @@
+{
+	"testMessage": "This is a test message!",
+
+	"common":
+	{
+		"confirm": "Confirm",
+		"cancel": "Cancel",
+		"close": "Close",
+		"loading": "Loading...",
+		"empty": "No data"
+	},
+
+	"currency":
+	{
+		"title": "Currency Rates",
+		"asOf": "Rate as of",
+		"rates": "Rates",
+		"myList": "My list",
+		"currency": "Currency",
+		"buy": "Buy",
+		"sell": "Sell",
+		"remove": "Remove",
+		"addCurrency": "Add currency",
+		"calculator": "Cross-rate calculator",
+		"amount": "Amount",
+		"loading": "Loading...",
+		"error": "Loading error",
+		"retry": "Retry",
+		"confirmOperation": "Confirm operation",
+		"cancel": "Cancel",
+		"operationSuccess": "Operation completed"
+	},
+
+	"theme":
+	{
+		"title": "Theme",
+		"light": "Light",
+		"dark": "Dark",
+		"system": "System"
+	},
+
+	"auth":
+	{
+		"idle":
+		{
+			"title": "Are you still here?",
+			"description": "Session will expire in {seconds} s.",
+			"stay": "I'm here",
+			"logout": "Log out"
+		},
+
+		"errors":
+		{
+			"invalid_credentials": "Incorrect email or password.",
+			"email_not_confirmed": "Confirm your email by clicking the link in the email.",
+			"registration_failed": "This email is already registered.",
+			"rate_limited": "Too many attempts. Try again in a minute.",
+			"invalid_session": "Session is invalid. Sign in again.",
+			"security": "Security error. Refresh the page and try again.",
+			"password_invalid_length": "Password must contain 12–128 characters.",
+			"profile_invalid_name": "Name must contain 1–100 characters.",
+			"email_invalid": "Invalid email address.",
+			"provider_unavailable": "Authentication service is temporarily unavailable. Please try again later.",
+			"generic": "Could not perform the action."
+		}
+	}
+}

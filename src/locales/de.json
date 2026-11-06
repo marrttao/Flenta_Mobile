@@ -1,0 +1,67 @@
+{
+	"testMessage": "Dies ist eine Testnachricht!",
+
+	"common":
+	{
+		"confirm": "Bestätigen",
+		"cancel": "Abbrechen",
+		"close": "Schließen",
+		"loading": "Wird geladen...",
+		"empty": "Keine Daten"
+	},
+
+	"currency":
+	{
+		"title": "Wechselkurse",
+		"asOf": "Kurs vom",
+		"rates": "Kurse",
+		"myList": "Meine Liste",
+		"currency": "Währung",
+		"buy": "Kaufen",
+		"sell": "Verkaufen",
+		"remove": "Entfernen",
+		"addCurrency": "Währung hinzufügen",
+		"calculator": "Kreuzkurs-Rechner",
+		"amount": "Betrag",
+		"loading": "Wird geladen...",
+		"error": "Ladefehler",
+		"retry": "Erneut versuchen",
+		"confirmOperation": "Vorgang bestätigen",
+		"cancel": "Abbrechen",
+		"operationSuccess": "Vorgang abgeschlossen"
+	},
+
+	"theme":
+	{
+		"title": "Thema",
+		"light": "Hell",
+		"dark": "Dunkel",
+		"system": "System"
+	},
+
+	"auth":
+	{
+		"idle":
+		{
+			"title": "Bist du noch da?",
+			"description": "Sitzung läuft in {seconds} s ab.",
+			"stay": "Ich bin hier",
+			"logout": "Abmelden"
+		},
+
+		"errors":
+		{
+			"invalid_credentials": "Falsche E-Mail oder falsches Passwort.",
+			"email_not_confirmed": "Bestätigen Sie Ihre E-Mail über den Link in der Nachricht.",
+			"registration_failed": "Diese E-Mail ist bereits registriert.",
+			"rate_limited": "Zu viele Versuche. Versuchen Sie es in einer Minute erneut.",
+			"invalid_session": "Sitzung ist ungültig. Melden Sie sich erneut an.",
+			"security": "Sicherheitsfehler. Seite neu laden und erneut versuchen.",
+			"password_invalid_length": "Passwort muss 12–128 Zeichen enthalten.",
+			"profile_invalid_name": "Name muss 1–100 Zeichen enthalten.",
+			"email_invalid": "Ungültige E-Mail-Adresse.",
+			"provider_unavailable": "Der Authentifizierungsdienst ist vorübergehend nicht verfügbar. Bitte später erneut versuchen.",
+			"generic": "Aktion konnte nicht ausgeführt werden."
+		}
+	}
+}

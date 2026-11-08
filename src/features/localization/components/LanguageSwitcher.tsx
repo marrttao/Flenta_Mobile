@@ -18,10 +18,12 @@ const styles = StyleSheet.create
 		{
 			paddingHorizontal: 14,
 			paddingVertical: 8,
+
+			backgroundColor: '#ffffff',
+			
 			borderRadius: 999,
 			borderWidth: 1,
 			borderColor: '#b7c7dc',
-			backgroundColor: '#ffffff',
 		},
 		chip_active:
 		{

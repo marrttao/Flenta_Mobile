@@ -1,4 +1,4 @@
-import { useRef, useState, type PropsWithChildren } from 'react';
+import { useRef, useState, type PropsWithChildren, type ReactNode } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,12 +13,19 @@ export const styles = StyleSheet.create({
   input: { backgroundColor: '#fff', borderColor: '#b7c7dc', borderWidth: 1, borderRadius: 10, padding: 12, fontSize: 16, color: '#132744' },
   error: { color: '#a42535', fontSize: 15, lineHeight: 22 }, success: { color: '#1d6748', fontSize: 15, lineHeight: 22 },
 });
+
+function renderChildren(children: ReactNode): ReactNode {
+  return typeof children === 'string' || typeof children === 'number'
+    ? <Text style={styles.text}>{children}</Text>
+    : children;
+}
+
 export function Page({ title, children, headerShown = false }: PropsWithChildren<{ title: string; headerShown?: boolean }>) {
   return <SafeAreaView style={styles.safe} edges={headerShown ? ['left', 'right', 'bottom'] : ['top', 'left', 'right', 'bottom']}><KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-    <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled"><Text accessibilityRole="header" style={styles.title}>{title}</Text>{children}</ScrollView>
+    <ScrollView contentContainerStyle={styles.page} keyboardShouldPersistTaps="handled"><Text accessibilityRole="header" style={styles.title}>{title}</Text>{renderChildren(children)}</ScrollView>
   </KeyboardAvoidingView></SafeAreaView>;
 }
-export function Panel({ children }: PropsWithChildren) { return <View style={styles.card}>{children}</View>; }
+export function Panel({ children }: PropsWithChildren) { return <View style={styles.card}>{renderChildren(children)}</View>; }
 export function Button({ title, onPress, disabled, secondary = false }: { title: string; onPress: () => void; disabled?: boolean; secondary?: boolean }) {
   return <Pressable accessibilityRole="button" accessibilityState={{ disabled: Boolean(disabled) }} disabled={disabled} onPress={onPress}
     style={({ pressed }) => [styles.button, secondary && styles.secondary, { opacity: disabled ? 0.5 : pressed ? 0.7 : 1 }]}>
@@ -44,3 +51,15 @@ export function useAction() {
   };
   return { busy, error, message, setMessage, run };
 }
+
+export type { LoaderProps } from './Loader/components/Loader';
+export type { BasicModalProps, ModalSize } from './Modal/components/BasicModal';
+export type { ConfirmModalProps } from './Modal/components/ConfirmModal';
+export type { ToastType, ToastOptions, ToastItemData, ToastContextValue } from './Toast/providers/ToastProvider';
+
+export { useToast } from './Toast/hooks/useToast';
+
+export { Loader } from './Loader/components/Loader';
+export { BasicModal } from './Modal/components/BasicModal';
+export { ConfirmModal } from './Modal/components/ConfirmModal';
+export { ToastProvider } from './Toast/providers/ToastProvider';

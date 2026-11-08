@@ -13,7 +13,7 @@ export function SignInPage() {
     <Field label="Пароль" value={password} onChangeText={setPassword} secureTextEntry autoComplete="current-password" />
     <Message error={action.error || auth.error} />
     <Button title="Увійти" disabled={action.busy || !email.trim() || !password} onPress={() => void action.run(async () => { await auth.login(email, password); setPassword(''); router.replace('/'); })} />
-    {auth.error && <Button title="Повторити відновлення сесії" secondary onPress={() => void auth.retryRestore()} />}
+    {auth.error ? (<Button title="Повторити відновлення сесії" secondary onPress={() => void auth.retryRestore()}/>) : null}
     <Link href="/auth/sign-up" style={styles.text}>Створити обліковий запис</Link><Link href="/auth/forgot-password" style={styles.text}>Забув пароль</Link>
   </Page>;
 }

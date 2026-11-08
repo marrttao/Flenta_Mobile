@@ -1,14 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
 import { AppState } from 'react-native';
 import { apiRequest } from '../../../config/api';
-import { secureStorage } from '../../../storage/adapters/secureStorage';
+import { SecureStorageAdapter } from '../../../storage/adapters/secure-storage-adapter';
 import { createAuthApi } from '../api/authApi';
 import { clearVerifier, getVerifier, startPkce, type PkcePurpose } from '../api/pkce';
 import { SessionService } from '../services/sessionService';
 
+const authStorage = new SecureStorageAdapter();
+
 function createAuth() {
   const api = createAuthApi(apiRequest);
-  const sessions = new SessionService(api, apiRequest, secureStorage);
+  const sessions = new SessionService(api, apiRequest, authStorage);
   const exchanges = new Map<string, Promise<void>>();
   return {
     sessions,

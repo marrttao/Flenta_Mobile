@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
-import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, StyleSheet, Text, View, useAnimatedValue } from 'react-native';
 
 
 
@@ -42,7 +42,7 @@ const styles = StyleSheet.create
 
 function Loader({ size = 'medium', label }: LoaderProps)
 {
-	const progress = useRef(new Animated.Value(0)).current;
+	const progress = useAnimatedValue(0);
 
 	useEffect
 	(

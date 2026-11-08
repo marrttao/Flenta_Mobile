@@ -8,18 +8,15 @@ class SecureStorageAdapter implements StorageAdapter
 {
 	async getItem(key: string): Promise<string | null>
 	{
-		try { return await SecureStore.getItemAsync(key); }
-		catch (error) { console.warn(`[SecureStorageAdapter.getItem] Failed to read: ${key} - ${String(error)}`); return null; }
+		return SecureStore.getItemAsync(key);
 	}
 	async setItem(key: string, value: string): Promise<void>
 	{
-		try { await SecureStore.setItemAsync(key, value); }
-		catch (error) { console.warn(`[SecureStorageAdapter.setItem] Failed to write: ${key} - ${String(error)}`); }
+		await SecureStore.setItemAsync(key, value);
 	}
 	async removeItem(key: string): Promise<void>
 	{
-		try { await SecureStore.deleteItemAsync(key); }
-		catch (error) { console.warn(`[SecureStorageAdapter.removeItem] Failed to remove: ${key} - ${String(error)}`); }
+		await SecureStore.deleteItemAsync(key);
 	}
 }
 

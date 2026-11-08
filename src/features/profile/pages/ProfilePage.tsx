@@ -7,12 +7,14 @@ import { profileApi } from '../api/profileApi';
 import { useResource } from '../../../hooks/useResource';
 
 export function ProfilePage() {
-  const auth = useAuth(); const action = useAction(); const [name, setName] = useState(auth.user?.displayName ?? '');
-  const profile = useResource(useCallback(() => profileApi.get(auth.request), [auth.request]));
-  useEffect(() => { if (profile.data) { setName(profile.data.displayName); auth.updateUser(profile.data); } }, [profile.data, auth.updateUser]);
+  const auth = useAuth(); const { request, updateUser } = auth; const action = useAction();
+  const [name, setName] = useState<string | null>(null);
+  const profile = useResource(useCallback(() => profileApi.get(request), [request]));
+  useEffect(() => { if (profile.data) updateUser(profile.data); }, [profile.data, updateUser]);
+  const displayName = name ?? auth.user?.displayName ?? '';
   return <Page title="Профіль" headerShown><Panel>{profile.pending && <Loading />}<Message error={profile.error || action.error} text={action.message} />
-    <Text selectable style={styles.text}>{auth.user?.email}</Text><Field label="Ім’я" value={name} onChangeText={setName} maxLength={100} />
-    <Button title="Зберегти" disabled={action.busy || !name.trim()} onPress={() => void action.run(async () => { auth.updateUser(await profileApi.update(auth.request, name.trim())); action.setMessage('Профіль збережено.'); })} />
+    <Text selectable style={styles.text}>{auth.user?.email}</Text><Field label="Ім’я" value={displayName} onChangeText={setName} maxLength={100} />
+    <Button title="Зберегти" disabled={action.busy || !displayName.trim()} onPress={() => void action.run(async () => { updateUser(await profileApi.update(request, displayName.trim())); setName((current) => current === displayName ? null : current); action.setMessage('Профіль збережено.'); })} />
     <Link href="/auth/change-password" style={styles.text}>Змінити пароль</Link><Button title="Вийти" secondary disabled={action.busy} onPress={() => void action.run(auth.logout)} />
   </Panel></Page>;
 }

@@ -109,6 +109,7 @@ confirmation and are hidden after 30 seconds, on blur or background.
 ```sh
 npm test
 npm run typecheck
+npm run lint
 npx expo export --platform all
 ```
 

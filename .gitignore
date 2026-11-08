@@ -49,3 +49,4 @@ example
 # directories for dev's configs, created by default
 .claude/
 .vscode/
+.tools/

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
 import { AppState } from 'react-native';
 import { apiRequest } from '../../../config/api';
 import { SecureStorageAdapter } from '../../../storage/adapters/secure-storage-adapter';
@@ -50,7 +50,7 @@ type Auth = ReturnType<typeof createAuth>;
 const AuthContext = createContext<Auth | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const auth = useMemo(createAuth, []);
+  const [auth] = useState(createAuth);
   useEffect(() => { void auth.sessions.restore(); }, [auth]);
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {

@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -11,17 +11,35 @@ if (__DEV__) require('../features/testing/registrations');
 
 
 
+const queryClient = new QueryClient
+(
+	{
+		defaultOptions:
+		{
+			queries:
+			{
+				retry: 1,
+				staleTime: 60_000,
+			},
+		},
+	}
+);
+
+
+
 function RootLayout()
 {
 	return (
 		<SafeAreaProvider>
 			<LocalizationProvider>
 				<ToastProvider>
-					<AuthProvider>
-						<KycProvider>
-							<Stack screenOptions={{ headerShown: false }}/>
-						</KycProvider>
-					</AuthProvider>
+					<QueryClientProvider client={queryClient}>
+						<AuthProvider>
+							<KycProvider>
+								<Stack screenOptions={{ headerShown: false }}/>
+							</KycProvider>
+						</AuthProvider>
+					</QueryClientProvider>
 				</ToastProvider>
 			</LocalizationProvider>
 		</SafeAreaProvider>

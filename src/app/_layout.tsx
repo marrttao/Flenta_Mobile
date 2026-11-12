@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from '../features/theme/index';
 import { LocalizationProvider } from '../features/localization/index';
 import { ToastProvider } from '../components/ui/index';
 import { AuthProvider } from '../features/auth/providers/AuthProvider';
@@ -31,17 +31,19 @@ function RootLayout()
 {
 	return (
 		<SafeAreaProvider>
-			<LocalizationProvider>
-				<ToastProvider>
-					<QueryClientProvider client={queryClient}>
-						<AuthProvider>
-							<KycProvider>
-								<Stack screenOptions={{ headerShown: false }}/>
-							</KycProvider>
-						</AuthProvider>
-					</QueryClientProvider>
-				</ToastProvider>
-			</LocalizationProvider>
+			<ThemeProvider>
+				<LocalizationProvider>
+					<ToastProvider>
+						<QueryClientProvider client={queryClient}>
+							<AuthProvider>
+								<KycProvider>
+									<Stack screenOptions={{ headerShown: false }}/>
+								</KycProvider>
+							</AuthProvider>
+						</QueryClientProvider>
+					</ToastProvider>
+				</LocalizationProvider>
+			</ThemeProvider>
 		</SafeAreaProvider>
 	);
 }

@@ -8,6 +8,7 @@ import { ExampleFeatureTest } from './test/ExampleFeatureTest';
 import { LocalizationTest } from '../localization/test/LocalizationTest'
 import { StorageTest } from '../../storage/test/StorageTest';
 import { CurrencyTest } from '../currency/test/CurrencyTest';
+import { ThemeTest } from '../theme/test/ThemeTest';
 
 import { LoaderTest } from '../../components/ui/Loader/test/LoaderTest';
 import { BasicModalTest } from '../../components/ui/Modal/test/BasicModalTest';
@@ -22,6 +23,7 @@ registerFeatureTest('example-test', ExampleFeatureTest);
 registerFeatureTest('localization', LocalizationTest)
 registerFeatureTest('storage', StorageTest);
 registerFeatureTest('currency', CurrencyTest);
+registerFeatureTest('theme', ThemeTest);
 
 registerUiTest('loader', LoaderTest);
 registerUiTest('basic-modal', BasicModalTest);

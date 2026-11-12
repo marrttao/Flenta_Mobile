@@ -39,11 +39,15 @@ export function createHttpClient(baseUrl: string, fetcher: typeof fetch = fetch)
         cache: 'no-store',
       });
       if (!response.ok) {
-        const problem = await response.json().catch(() => ({})) as {
-          errors?: Record<string, string[]>; detail?: string; title?: string; code?: string;
-        };
-        const validation = problem.errors ? Object.values(problem.errors).flat().join(' ') : '';
-        throw new ApiError(validation || problem.detail || problem.title || 'Запит не виконано.', response.status, problem.code ?? null);
+        const payload: unknown = await response.json().catch(() => null);
+        const problem = payload !== null && typeof payload === 'object' && !Array.isArray(payload)
+          ? payload as Record<string, unknown> : {};
+        const validation = problem.errors !== null && typeof problem.errors === 'object' && !Array.isArray(problem.errors)
+          ? Object.values(problem.errors).flat().filter((value): value is string => typeof value === 'string' && Boolean(value.trim())).join(' ') : '';
+        const detail = typeof problem.detail === 'string' ? problem.detail.trim() : '';
+        const title = typeof problem.title === 'string' ? problem.title.trim() : '';
+        throw new ApiError(validation || detail || title || 'Запит не виконано.', response.status,
+          typeof problem.code === 'string' ? problem.code : null);
       }
       if (response.status === 204) return null as T;
       try { return await response.json() as T; }

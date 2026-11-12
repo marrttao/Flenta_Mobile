@@ -26,6 +26,27 @@ test('HTTP refuses absolute URLs before exposing a token', async () => {
   await assert.rejects(request('https://bad.test/api/profile', { token: 'secret' })); assert.equal(called, false);
 });
 
+test('malformed Problem Details preserve the HTTP status and safe error fields', async () => {
+  const bodies = [null, [], 'upstream error', 42,
+    { title: {}, detail: [], code: 42, errors: 'not-a-map' },
+    { errors: { field: [null, {}, 42] }, code: { prefix: 'kyc.' } }];
+  for (const status of [400, 401, 403, 429, 503]) {
+    for (const body of bodies) {
+      const request = createHttpClient('https://api.test', async () => Response.json(body, { status }));
+      await assert.rejects(request('/api/profile'), (error) =>
+        error instanceof ApiError && error.status === status && error.code === null && error.message === 'Запит не виконано.');
+    }
+  }
+});
+
+test('validation messages ignore non-string values without losing valid messages', async () => {
+  const request = createHttpClient('https://api.test', async () => Response.json({
+    errors: { amount: [null, {}, 42, 'Invalid amount', ''], currency: ['Unsupported currency'] }, code: 'amount.invalid',
+  }, { status: 400 }));
+  await assert.rejects(request('/api/accounts'), (error) => error.status === 400 &&
+    error.code === 'amount.invalid' && error.message === 'Invalid amount Unsupported currency');
+});
+
 test('mobile auth asks backend to select mobile callbacks and sends PKCE to exchange', async () => {
   const calls = []; const api = createAuthApi(async (path, options) => { calls.push({ path, ...options }); return {}; });
   await api.register('a@example.test', 'long-password', 'Name', 'challenge'); await api.recover('a@example.test', 'challenge'); await api.exchange('code', 'verifier');

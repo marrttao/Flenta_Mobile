@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { SessionService } from '../src/features/auth/services/sessionService.ts';
-import { ApiError } from '../src/features/auth/api/httpClient.ts';
+import { ApiError, createHttpClient } from '../src/features/auth/api/httpClient.ts';
 import { StorageKeys } from '../src/storage/keys.ts';
 
 const deferred = () => { let resolve, reject; const promise = new Promise((yes, no) => { resolve = yes; reject = no; }); return { promise, resolve, reject }; };
@@ -106,4 +106,19 @@ test('KYC errors invalidate status; KYC endpoint errors do not recursively inval
   await login(); const epoch = service.getSnapshot().kycEpoch;
   await assert.rejects(service.request('/api/accounts')); assert.equal(service.getSnapshot().kycEpoch, epoch + 1);
   await assert.rejects(service.request('/api/kyc')); assert.equal(service.getSnapshot().kycEpoch, epoch + 1);
+});
+
+test('a 401 with a JSON null body still refreshes the session and retries once', async () => {
+  let calls = 0; let refreshes = 0;
+  const send = createHttpClient('https://api.test', async (_url, options) => {
+    calls++;
+    if (calls === 1) return Response.json(null, { status: 401 });
+    assert.equal(options.headers.Authorization, 'Bearer new');
+    return Response.json({ ok: true });
+  });
+  const { service, login } = fixture({ send, api: { async refresh() { refreshes++; return session('new'); } } });
+  await login();
+  assert.deepEqual(await service.request('/api/accounts'), { ok: true });
+  assert.equal(refreshes, 1);
+  assert.equal(calls, 2);
 });

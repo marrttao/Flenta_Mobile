@@ -17,6 +17,17 @@ import { styles as uiStyles } from '../../components/ui';
 
 const ALL_KEYS = Object.values(StorageKeys) as StorageKeys[];
 
+async function readStoredValues(): Promise<Record<string, string>>
+{
+	const next: Record<string, string> = {};
+	for (const entry of ALL_KEYS)
+	{
+		const parsed = await storageService.getItem<unknown>(entry);
+		next[entry] = parsed === null ? '<null>' : JSON.stringify(parsed);
+	}
+	return next;
+}
+
 
 
 function StorageTest()
@@ -32,18 +43,17 @@ function StorageTest()
 	(
 		async () =>
 		{
-			const next: Record<string, string> = {};
-			for (const entry of ALL_KEYS)
-			{
-				const parsed = await storageService.getItem<unknown>(entry);
-				next[entry] = parsed === null ? '<null>' : JSON.stringify(parsed);
-			}
-			setValues(next);
+			setValues(await readStoredValues());
 		},
 		[]
 	);
 
-	useEffect(() => { void reload(); }, [reload]);
+	useEffect(() =>
+	{
+		let active = true;
+		void readStoredValues().then((next) => { if (active) setValues(next); });
+		return () => { active = false; };
+	}, []);
 
 	const handleGet = () => void action.run
 	(

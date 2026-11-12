@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react';
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type PropsWithChildren } from 'react';
 import { AppState } from 'react-native';
 import { useAuth } from '../../auth/providers/AuthProvider';
 import { kycApi, type KycStatus } from '../api/kycApi';
@@ -11,7 +11,10 @@ export function KycProvider({ children }: PropsWithChildren) {
   const owner = user?.id;
   const identity = `${owner ?? ''}:${kycEpoch}`;
   const latest = useRef(identity);
-  latest.current = identity;
+  useLayoutEffect(() => {
+    latest.current = identity;
+    return () => { latest.current = ''; };
+  }, [identity]);
   const inFlight = useRef<{ identity: string; promise: Promise<KycStatus | null> } | null>(null);
   const [result, setResult] = useState<{ identity: string; status: KycStatus | null; error: string } | null>(null);
   const load = useCallback((synchronize = false): Promise<KycStatus | null> => {

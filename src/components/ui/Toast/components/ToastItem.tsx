@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useTranslation } from '../../../../features/localization/index';
 
 import type { ToastItemData } from '../providers/ToastProvider';
 
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Pressable, StyleSheet, Text, View, useAnimatedValue } from 'react-native';
 
 
 
@@ -96,8 +96,8 @@ function ToastItem({ toast, removeToast }: ToastItemProps)
 	const { translate } = useTranslation();
 
 	const [exiting, setExiting] = useState(false);
-	const opacity = useRef(new Animated.Value(0)).current;
-	const translateX = useRef(new Animated.Value(20)).current;
+	const opacity = useAnimatedValue(0);
+	const translateX = useAnimatedValue(20);
 
 	useEffect
 	(

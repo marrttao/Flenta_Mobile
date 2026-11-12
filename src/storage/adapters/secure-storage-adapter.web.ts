@@ -6,30 +6,18 @@ class SecureStorageAdapter implements StorageAdapter
 {
 	async getItem(key: string): Promise<string | null>
 	{
-		try
-		{
-			if (typeof window === 'undefined' || !window.sessionStorage) { return null; }
-			return window.sessionStorage.getItem(key);
-		}
-		catch (error) { console.warn(`[SecureStoreAdapter.getItem.web] Failed to read: ${key} - ${String(error)}`); return null; }
+		if (typeof window === 'undefined') { return null; }
+		return window.sessionStorage.getItem(key);
 	}
 	async setItem(key: string, value: string): Promise<void>
 	{
-		try
-		{
-			if (typeof window === 'undefined' || !window.sessionStorage) { return; }
-			window.sessionStorage.setItem(key, value);
-		}
-		catch (error) { console.warn(`[SecureStoreAdapter.setItem.web] Failed to write: ${key} - ${String(error)}`); }
+		if (typeof window === 'undefined') { return; }
+		window.sessionStorage.setItem(key, value);
 	}
 	async removeItem(key: string): Promise<void>
 	{
-		try
-		{
-			if (typeof window === 'undefined' || !window.sessionStorage) { return; }
-			window.sessionStorage.removeItem(key);
-		}
-		catch (error) { console.warn(`[SecureStoreAdapter.removeItem.web] Failed to remove: ${key} - ${String(error)}`); }
+		if (typeof window === 'undefined') { return; }
+		window.sessionStorage.removeItem(key);
 	}
 }
 

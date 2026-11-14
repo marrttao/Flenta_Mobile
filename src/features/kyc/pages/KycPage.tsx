@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Redirect } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { Text } from 'react-native';

@@ -3,6 +3,19 @@ import { AppState } from 'react-native';
 import { useAuth } from '../../auth/providers/AuthProvider';
 import { kycApi, type KycStatus } from '../api/kycApi';
 
+const KYC_ENABLED = !['false', '0', 'no'].includes(
+  (process.env.EXPO_PUBLIC_ENABLE_KYC ?? 'true').trim().toLowerCase(),
+);
+
+const DISABLED_STATUS: KycStatus = {
+  provider: 'disabled',
+  status: 'Disabled',
+  canAccess: true,
+  sandbox: false,
+  failureCode: null,
+  updatedAt: null,
+};
+
 interface KycContextValue { status: KycStatus | null; pending: boolean; error: string; load: (synchronize?: boolean) => Promise<KycStatus | null> }
 const KycContext = createContext<KycContextValue | null>(null);
 
@@ -18,6 +31,7 @@ export function KycProvider({ children }: PropsWithChildren) {
   const inFlight = useRef<{ identity: string; promise: Promise<KycStatus | null> } | null>(null);
   const [result, setResult] = useState<{ identity: string; status: KycStatus | null; error: string } | null>(null);
   const load = useCallback((synchronize = false): Promise<KycStatus | null> => {
+    if (!KYC_ENABLED) return Promise.resolve(DISABLED_STATUS);
     if (!owner) return Promise.resolve(null);
     if (inFlight.current?.identity === identity) return inFlight.current.promise;
     const promise = (synchronize ? kycApi.refresh(request) : kycApi.status(request)).then((status) => {
@@ -34,6 +48,7 @@ export function KycProvider({ children }: PropsWithChildren) {
   const active = result?.identity === identity ? result : null;
   const status = active?.status ?? null;
   useEffect(() => {
+    if (!KYC_ENABLED) return;
     if (!owner) return;
     const listener = AppState.addEventListener('change', (state) => { if (state === 'active') void load(true).catch(() => {}); });
     const timer = setInterval(() => {
@@ -43,6 +58,13 @@ export function KycProvider({ children }: PropsWithChildren) {
     }, 15_000);
     return () => { listener.remove(); clearInterval(timer); };
   }, [owner, status, load]);
+  if (!KYC_ENABLED) {
+    return (
+      <KycContext.Provider value={{ status: DISABLED_STATUS, pending: false, error: '', load: () => Promise.resolve(DISABLED_STATUS) }}>
+        {children}
+      </KycContext.Provider>
+    );
+  }
   return <KycContext.Provider value={{ status, pending: Boolean(owner && !active), error: active?.error ?? '', load }}>{children}</KycContext.Provider>;
 }
 export function useKyc() { const value = useContext(KycContext); if (!value) throw new Error('KycProvider is required.'); return value; }

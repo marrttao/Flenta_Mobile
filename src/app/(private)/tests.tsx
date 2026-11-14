@@ -1,0 +1,1 @@
+export { default } from '../../features/testing/components/test-home-screen';

@@ -13,3 +13,10 @@ export interface AsyncStorageAdapter {
   setItem(key: string, value: string): Promise<void>;
   removeItem(key: string): Promise<void>;
 }
+
+export interface AuthSessionInfo
+{
+    expiresAt: number | null;
+    msUntilExpiry: number | null;
+    expiresIn: number | null;
+}

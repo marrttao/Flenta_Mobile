@@ -9,6 +9,7 @@ import { LocalizationTest } from '../localization/test/LocalizationTest'
 import { StorageTest } from '../../storage/test/StorageTest';
 import { CurrencyTest } from '../currency/test/CurrencyTest';
 import { ThemeTest } from '../theme/test/ThemeTest';
+import { AuthIdleTest } from '../auth/test/AuthIdleTest';
 
 import { LoaderTest } from '../../components/ui/Loader/test/LoaderTest';
 import { BasicModalTest } from '../../components/ui/Modal/test/BasicModalTest';
@@ -18,12 +19,12 @@ import { ToastTest } from '../../components/ui/Toast/test/ToastTest';
 import { CurrencyApiTest } from '../currency/test/CurrencyApiTest';
 
 
-
 registerFeatureTest('example-test', ExampleFeatureTest);
 registerFeatureTest('localization', LocalizationTest)
 registerFeatureTest('storage', StorageTest);
 registerFeatureTest('currency', CurrencyTest);
 registerFeatureTest('theme', ThemeTest);
+registerFeatureTest('auth-idle', AuthIdleTest);
 
 registerUiTest('loader', LoaderTest);
 registerUiTest('basic-modal', BasicModalTest);

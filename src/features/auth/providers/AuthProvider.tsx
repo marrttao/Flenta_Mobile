@@ -1,10 +1,11 @@
-import { createContext, useContext, useEffect, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
 import { AppState } from 'react-native';
 import { apiRequest } from '../../../config/api';
 import { SecureStorageAdapter } from '../../../storage/adapters/secure-storage-adapter';
 import { createAuthApi } from '../api/authApi';
 import { clearVerifier, getVerifier, startPkce, type PkcePurpose } from '../api/pkce';
 import { SessionService } from '../services/sessionService';
+import type { AuthSessionInfo } from '../types';
 
 const authStorage = new SecureStorageAdapter();
 
@@ -44,13 +45,15 @@ function createAuth() {
       exchanges.clear();
       try { await sessions.logout(); } finally { await clearVerifier(); }
     },
+    // Exposed for idle-timeout "stay here" and future feature-driven refreshes.
+    refreshSession: () => sessions.refresh().then(() => {}),
   };
 }
 type Auth = ReturnType<typeof createAuth>;
 const AuthContext = createContext<Auth | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const [auth] = useState(createAuth);
+  const auth = useMemo(createAuth, []);
   useEffect(() => { void auth.sessions.restore(); }, [auth]);
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {
@@ -65,6 +68,27 @@ export function useAuth() {
   const auth = useContext(AuthContext);
   if (!auth) throw new Error('AuthProvider is required.');
   const state = useSyncExternalStore(auth.sessions.subscribe, auth.sessions.getSnapshot, auth.sessions.getSnapshot);
-  return { ...state, login: auth.login, register: auth.register, recover: auth.recover, exchangeCode: auth.exchangeCode,
-    logout: auth.logout, request: auth.sessions.request, updateUser: auth.sessions.updateUser, retryRestore: auth.sessions.restore };
+
+  const sessionInfo = useMemo<AuthSessionInfo | null>(() => {
+    if (!state.user) return null;
+    return {
+      expiresAt: state.expiresAt,
+      msUntilExpiry: state.expiresAt ? state.expiresAt - Date.now() : null,
+      expiresIn: state.expiresAt ? Math.max(0, Math.floor((state.expiresAt - Date.now()) / 1000)) : null,
+    };
+  }, [state.user, state.expiresAt]);
+
+  return {
+    ...state,
+    login: auth.login,
+    register: auth.register,
+    recover: auth.recover,
+    exchangeCode: auth.exchangeCode,
+    logout: auth.logout,
+    request: auth.sessions.request,
+    updateUser: auth.sessions.updateUser,
+    retryRestore: auth.sessions.restore,
+    refreshSession: auth.refreshSession,
+    sessionInfo,
+  };
 }

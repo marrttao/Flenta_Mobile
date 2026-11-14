@@ -66,7 +66,7 @@ export class SessionService {
     })();
     return this.restoreInFlight;
   };
-  private refresh(): Promise<AuthSession> {
+  refresh(): Promise<AuthSession> {
     const version = this.version;
     if (this.refreshInFlight?.version === version) return this.refreshInFlight.promise;
     if (!this.session) return Promise.reject(new Error('Увійди до облікового запису.'));

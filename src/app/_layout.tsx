@@ -9,6 +9,8 @@ import { AuthProvider } from '../features/auth/providers/AuthProvider';
 import { KycProvider } from '../features/kyc/providers/KycProvider';
 if (__DEV__) require('../features/testing/registrations');
 
+import { IdleTimeoutHost } from '../features/auth/components/IdleTimeoutHost';
+
 
 
 const queryClient = new QueryClient
@@ -38,6 +40,7 @@ function RootLayout()
 							<AuthProvider>
 								<KycProvider>
 									<Stack screenOptions={{ headerShown: false }}/>
+									<IdleTimeoutHost/>
 								</KycProvider>
 							</AuthProvider>
 						</QueryClientProvider>

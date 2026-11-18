@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useSyncExternalStore, type PropsWithChildren } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useSyncExternalStore, type PropsWithChildren } from 'react';
 import { AppState } from 'react-native';
 import { apiRequest } from '../../../config/api';
 import { SecureStorageAdapter } from '../../../storage/adapters/secure-storage-adapter';
@@ -6,6 +6,7 @@ import { createAuthApi } from '../api/authApi';
 import { clearVerifier, getVerifier, startPkce, type PkcePurpose } from '../api/pkce';
 import { SessionService } from '../services/sessionService';
 import type { AuthSessionInfo } from '../types';
+import { useTokenExpiry } from '../hooks/useTokenExpiry';
 
 const authStorage = new SecureStorageAdapter();
 
@@ -50,10 +51,18 @@ function createAuth() {
   };
 }
 type Auth = ReturnType<typeof createAuth>;
-const AuthContext = createContext<Auth | null>(null);
+const AuthContext = createContext<(Auth & { sessionInfo: AuthSessionInfo | null }) | null>(null);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-  const auth = useMemo(createAuth, []);
+  const [auth] = useState(createAuth);
+  const state = useSyncExternalStore(auth.sessions.subscribe, auth.sessions.getSnapshot, auth.sessions.getSnapshot);
+  const { msUntilExpiry } = useTokenExpiry(state.expiresAt);
+  const sessionInfo = useMemo<AuthSessionInfo | null>(() => state.user ? {
+    expiresAt: state.expiresAt,
+    msUntilExpiry,
+    expiresIn: msUntilExpiry === null ? null : Math.max(0, Math.floor(msUntilExpiry / 1000)),
+  } : null, [state.user, state.expiresAt, msUntilExpiry]);
+  const value = useMemo(() => ({ ...auth, sessionInfo }), [auth, sessionInfo]);
   useEffect(() => { void auth.sessions.restore(); }, [auth]);
   useEffect(() => {
     const listener = AppState.addEventListener('change', (state) => {
@@ -61,22 +70,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
     });
     return () => listener.remove();
   }, [auth]);
-  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
   const auth = useContext(AuthContext);
   if (!auth) throw new Error('AuthProvider is required.');
   const state = useSyncExternalStore(auth.sessions.subscribe, auth.sessions.getSnapshot, auth.sessions.getSnapshot);
-
-  const sessionInfo = useMemo<AuthSessionInfo | null>(() => {
-    if (!state.user) return null;
-    return {
-      expiresAt: state.expiresAt,
-      msUntilExpiry: state.expiresAt ? state.expiresAt - Date.now() : null,
-      expiresIn: state.expiresAt ? Math.max(0, Math.floor((state.expiresAt - Date.now()) / 1000)) : null,
-    };
-  }, [state.user, state.expiresAt]);
 
   return {
     ...state,
@@ -89,6 +89,6 @@ export function useAuth() {
     updateUser: auth.sessions.updateUser,
     retryRestore: auth.sessions.restore,
     refreshSession: auth.refreshSession,
-    sessionInfo,
+    sessionInfo: auth.sessionInfo,
   };
 }

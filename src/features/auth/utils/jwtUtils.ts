@@ -64,18 +64,16 @@ function getTokenExpiryMs(token: string): number | null
 {
 	const payload = decodeJwtPayload<{ exp?: number }>(token);
 	if (!payload || typeof payload.exp !== 'number' || !Number.isFinite(payload.exp)) { return null; }
-	return payload.exp * 1000;
+	const expiresAt = payload.exp * 1000;
+	return Number.isFinite(expiresAt) ? expiresAt : null;
 }
 
 function isTokenExpired(token: string | null, clockSkewMs = 5_000): boolean
 {
 	if (!token) { return true; }
 
-	const payload = decodeJwtPayload<{ exp?: number }>(token);
-	if (!payload) { return true; }
-	if (typeof payload.exp !== 'number') { return false; }
-
-	return Date.now() + clockSkewMs >= payload.exp * 1000;
+	const expiresAt = getTokenExpiryMs(token);
+	return expiresAt === null || Date.now() + clockSkewMs >= expiresAt;
 }
 
 

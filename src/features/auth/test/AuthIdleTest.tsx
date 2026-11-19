@@ -22,6 +22,16 @@ interface StorageFlags
 	userId: boolean;
 }
 
+async function readStorageFlags(): Promise<StorageFlags>
+{
+	const [access, refresh, userId] = await Promise.all([
+		storageService.getItem<string>(StorageKeys.ACCESS_TOKEN),
+		storageService.getItem<string>(StorageKeys.REFRESH_TOKEN),
+		storageService.getItem<string>(StorageKeys.SESSION_USER_ID),
+	]);
+	return { access: Boolean(access), refresh: Boolean(refresh), userId: Boolean(userId) };
+}
+
 
 
 const local = StyleSheet.create
@@ -53,21 +63,17 @@ function AuthIdleTest()
 	(
 		async () =>
 		{
-			const [access, refresh, userId] = await Promise.all
-			(
-				[
-					storageService.getItem<string>(StorageKeys.ACCESS_TOKEN),
-					storageService.getItem<string>(StorageKeys.REFRESH_TOKEN),
-					storageService.getItem<string>(StorageKeys.SESSION_USER_ID),
-				]
-			);
-
-			setStorageFlags({ access: Boolean(access), refresh: Boolean(refresh), userId: Boolean(userId) });
+			setStorageFlags(await readStorageFlags());
 		},
 		[]
 	);
 
-	useEffect(() => { void refreshStorageFlags(); }, [auth.user, refreshStorageFlags]);
+	useEffect(() =>
+	{
+		let active = true;
+		void readStorageFlags().then((flags) => { if (active) setStorageFlags(flags); });
+		return () => { active = false; };
+	}, [auth.user]);
 
 	const sessionJson = auth.user ? { user: auth.user, sessionInfo: auth.sessionInfo } : null;
 

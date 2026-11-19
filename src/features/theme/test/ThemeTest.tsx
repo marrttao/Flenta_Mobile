@@ -40,7 +40,7 @@ const testPalette =
 	}
 } as const;
 
-type Palette = typeof testPalette.light;
+type Palette = (typeof testPalette)[keyof typeof testPalette];
 
 
 

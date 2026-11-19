@@ -28,8 +28,9 @@ const DEFAULT_MS_BEFORE_EXPIRY = 30_000;
 
 function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, onRefresh, onLogout }: UseIdleTimeoutOptions): UseIdleTimeoutResult
 {
-	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [openedFor, setOpenedFor] = useState<number | null>(null);
 	const [secondsLeft, setSecondsLeft] = useState(0);
+	const isModalOpen = expiresAt !== null && openedFor === expiresAt;
 
 	const onRefreshRef = useRef(onRefresh);
 	const onLogoutRef = useRef(onLogout);
@@ -47,20 +48,17 @@ function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, 
 	(
 		() =>
 		{
-			setIsModalOpen(false);
-			setSecondsLeft(0);
-
 			clearOpenTimer();
 			clearCountdown();
 
-			if (!expiresAt) { return; }
+			if (expiresAt === null || !Number.isFinite(expiresAt)) { return; }
 
 			const showAt = expiresAt - msBeforeExpiry;
 			const delayToShow = Math.max(0, showAt - Date.now());
 
 			const startCountdown = () =>
 			{
-				setIsModalOpen(true);
+				setOpenedFor(expiresAt);
 
 				const update = () =>
 				{
@@ -72,14 +70,15 @@ function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, 
 					if (next <= 0)
 					{
 						clearCountdown();
-						setIsModalOpen(false);
+						setOpenedFor(null);
 
-						void onLogoutRef.current();
+						void Promise.resolve().then(() => onLogoutRef.current()).catch(() => {});
+						return false;
 					}
+					return true;
 				};
 
-				update();
-				countdownRef.current = setInterval(update, 1_000);
+				if (update()) { countdownRef.current = setInterval(update, 1_000); }
 			};
 
 			openTimerRef.current = setTimeout(startCountdown, delayToShow);
@@ -97,7 +96,7 @@ function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, 
 	(
 		async () =>
 		{
-			setIsModalOpen(false);
+			setOpenedFor(null);
 			clearOpenTimer();
 			clearCountdown();
 
@@ -111,7 +110,7 @@ function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, 
 	(
 		async () =>
 		{
-			setIsModalOpen(false);
+			setOpenedFor(null);
 			clearOpenTimer();
 			clearCountdown();
 
@@ -121,7 +120,7 @@ function useIdleTimeout({ expiresAt, msBeforeExpiry = DEFAULT_MS_BEFORE_EXPIRY, 
 		[clearOpenTimer, clearCountdown]
 	);
 
-	return { isModalOpen, secondsLeft, stayHere, logoutNow };
+	return { isModalOpen, secondsLeft: isModalOpen ? secondsLeft : 0, stayHere, logoutNow };
 }
 
 

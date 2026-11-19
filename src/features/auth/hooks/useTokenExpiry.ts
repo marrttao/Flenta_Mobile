@@ -12,33 +12,33 @@ interface TokenExpiryResult
 
 function useTokenExpiry(expiresAt: number | null): TokenExpiryResult
 {
-	const [msUntilExpiry, setMsUntilExpiry] = useState<number | null>(null);
+	const [sample, setSample] = useState<{ deadline: number | null; remaining: number | null }>({ deadline: null, remaining: null });
 
 	useEffect
 	(
 		() =>
 		{
-			if (!expiresAt) { setMsUntilExpiry(null); return; }
+			if (expiresAt === null || !Number.isFinite(expiresAt)) { return; }
 
 			let intervalId: ReturnType<typeof setInterval> | null = null;
 
 			const tick = () =>
 			{
 				const remaining = expiresAt - Date.now();
-				setMsUntilExpiry(remaining);
+				setSample({ deadline: expiresAt, remaining });
 
 				if (remaining < -60_000 && intervalId !== null) { clearInterval(intervalId); intervalId = null; }
 			};
 
-			tick();
+			const initialTick = setTimeout(tick, 0);
 			intervalId = setInterval(tick, 1_000);
 
-			return () => { if (intervalId !== null) { clearInterval(intervalId); } };
+			return () => { clearTimeout(initialTick); if (intervalId !== null) { clearInterval(intervalId); } };
 		},
 		[expiresAt]
 	);
 
-	return { expiresAt, msUntilExpiry };
+	return { expiresAt, msUntilExpiry: sample.deadline === expiresAt ? sample.remaining : null };
 }
 
 

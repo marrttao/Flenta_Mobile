@@ -1,288 +1,397 @@
-import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, Text, View, useColorScheme } from 'react-native';
-import { router } from 'expo-router';
+import { useMemo } from 'react';
 
-import { Button, Page, Panel } from '../../../components/ui';
-import { styles } from '../../../components/ui';
+import type { AppTheme, ThemeMode } from '../types';
+import { palette } from '../tokens';
 
 import { useTheme } from '../hooks/useTheme';
-import { ThemeSwitcher } from '../components/ThemeSwitcher';
+import { useThemedStyles } from '../hooks/useThemedStyles';
+
+import { Pressable, Text, View } from 'react-native';
+import { Page } from '../../../components/ui';
 
 
 
-const testPalette =
-{
-	light:
-	{
-		background: '#f4f7fc',
-		surface: '#ffffff',
-		border: '#b7c7dc',
-		heading: '#132744',
-		text: '#263a53',
-		muted: '#5b6b80',
-		accent: '#2363d8',
-		accentText: '#ffffff',
-		success: '#1d6748',
-		danger: '#a42535'
-	},
-	dark:
-	{
-		background: '#0f172a',
-		surface: '#1e293b',
-		border: '#334155',
-		heading: '#f1f5f9',
-		text: '#cbd5e1',
-		muted: '#94a3b8',
-		accent: '#60a5fa',
-		accentText: '#0f172a',
-		success: '#4ade80',
-		danger: '#f87171'
-	}
-} as const;
-
-type Palette = (typeof testPalette)[keyof typeof testPalette];
+const MODES: readonly ThemeMode[] = ['system', 'light', 'dark'] as const;
 
 
 
-const local = StyleSheet.create
+type ColorGroupKey = 'brand' | 'feedback' | 'neutral' | 'action';
+
+
+
+const COLOR_GROUPS: readonly ColorGroupKey[] =
+[
+	'brand',
+	'feedback',
+	'neutral',
+	'action',
+] as const;
+
+type TypographyRoleKey =
+	| 'h1'
+	| 'h2'
+	| 'h3'
+	| 'h4'
+	| 'h5'
+	| 'h6'
+	| 'bodyLarge'
+	| 'bodyText'
+	| 'buttonText'
+	| 'smallButtonText'
+	| 'inputLabel'
+	| 'secondaryLabel';
+
+const TYPOGRAPHY_ROLES: readonly TypographyRoleKey[] =
+[
+	'h1',
+	'h2',
+	'h3',
+	'h4',
+	'h5',
+	'h6',
+	'bodyLarge',
+	'bodyText',
+	'buttonText',
+	'smallButtonText',
+	'inputLabel',
+	'secondaryLabel',
+] as const;
+
+const createStyles = (theme: AppTheme) =>
 (
 	{
-		code:
-		{
-			fontFamily: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
-			fontSize: 12,
-			lineHeight: 18
+		container: {
+			backgroundColor: theme.colors.neutral.bg,
+			gap: theme.spacing.lg,
+			paddingBottom: theme.spacing.huge,
 		},
-
-		preview:
-		{
-			padding: 16,
-			gap: 12,
-
+		section: {
+			backgroundColor: theme.colors.neutral.base,
+			borderColor: theme.colors.neutral.divider,
 			borderWidth: 1,
-			borderRadius: 12
+			borderRadius: theme.radii.xl,
+			padding: theme.spacing.lg,
+			gap: theme.spacing.md,
 		},
-
-		swatchRow:
-		{
-			flexDirection: 'row',
-			flexWrap: 'wrap',
-			gap: 8
+		sectionTitle: {
+			...theme.typography.h5,
+			color: theme.colors.neutral.primary,
 		},
-		swatch:
-		{
-			width: 72,
-			height: 56,
-
-			alignItems: 'center',
-			justifyContent: 'center',
-
+		groupTitle: {
+			...theme.typography.inputLabel,
+			color: theme.colors.neutral.secondary,
+		},
+		metaText: {
+			...theme.typography.bodyText,
+			color: theme.colors.neutral.secondary,
+		},
+		captionText: {
+			...theme.typography.secondaryLabel,
+			color: theme.colors.neutral.tertiary,
+		},
+		rowWrap: {
+			flexDirection: 'row' as const,
+			flexWrap: 'wrap' as const,
+			gap: theme.spacing.sm,
+		},
+		modeChip: {
+			paddingHorizontal: theme.spacing.lg,
+			paddingVertical: theme.spacing.xs,
+			borderRadius: theme.radii.full,
 			borderWidth: 1,
-			borderRadius: 8
+			borderColor: theme.colors.neutral.divider,
+			backgroundColor: theme.colors.neutral.bg,
 		},
-		swatchLabel:
-		{
-			fontSize: 10,
-			fontWeight: '600'
+		modeChipActive: {
+			borderColor: theme.colors.action.primary,
+			backgroundColor: theme.colors.action.secondary,
 		},
-
-		chip:
-		{
-			paddingHorizontal: 14,
-			paddingVertical: 10,
-
+		modeChipLabel: {
+			...theme.typography.smallButtonText,
+			color: theme.colors.neutral.primary,
+		},
+		modeChipLabelActive: {
+			...theme.typography.smallButtonText,
+			color: theme.colors.action.secondaryText,
+		},
+		groupBlock: {
+			gap: theme.spacing.xs,
+		},
+		swatchCard: {
+			width: theme.spacing.huge * 2,
+			backgroundColor: theme.colors.neutral.bg,
+			borderColor: theme.colors.neutral.divider,
 			borderWidth: 1,
-			borderRadius: 8
+			borderRadius: theme.radii.md,
+			padding: theme.spacing.xxs,
+			gap: theme.spacing.xxs,
 		},
-		chipText:
-		{
-			fontSize: 14,
-			fontWeight: '600'
-		}
+		swatchFill: {
+			height: theme.spacing.xxl,
+			borderRadius: theme.radii.sm,
+			borderWidth: 1,
+			borderColor: theme.colors.neutral.divider,
+		},
+		gradientBlock: {
+			gap: theme.spacing.xxs,
+		},
+		gradientStrip: {
+			flexDirection: 'row' as const,
+			height: theme.spacing.xl,
+			borderRadius: theme.radii.md,
+			overflow: 'hidden' as const,
+			borderWidth: 1,
+			borderColor: theme.colors.neutral.divider,
+		},
+		gradientStop: {
+			flex: 1,
+		},
+		typographyRow: {
+			gap: theme.spacing.xxs,
+			paddingBottom: theme.spacing.xs,
+			borderBottomWidth: 1,
+			borderBottomColor: theme.colors.neutral.divider,
+		},
+		typographySample: {
+			color: theme.colors.neutral.primary,
+		},
+		spacingRow: {
+			gap: theme.spacing.xxs,
+		},
+		spacingBar: {
+			height: theme.spacing.sm,
+			backgroundColor: theme.colors.action.primary,
+			borderRadius: theme.radii.sm,
+		},
+		radiusBox: {
+			width: theme.spacing.huge + theme.spacing.lg,
+			height: theme.spacing.huge + theme.spacing.lg,
+			backgroundColor: theme.colors.action.secondary,
+			borderColor: theme.colors.action.primary,
+			borderWidth: 1,
+			alignItems: 'center' as const,
+			justifyContent: 'center' as const,
+		},
+		scalePill: {
+			paddingHorizontal: theme.spacing.md,
+			paddingVertical: theme.spacing.xs,
+			backgroundColor: theme.colors.neutral.bg,
+			borderColor: theme.colors.neutral.divider,
+			borderWidth: 1,
+			borderRadius: theme.radii.md,
+		},
 	}
 );
 
-
-
-function previewStyles(palette: Palette)
-{
-	return {
-		preview:
-		{
-			backgroundColor: palette.background,
-			borderColor: palette.border
-		},
-		card:
-		{
-			padding: 14,
-			gap: 6,
-
-			backgroundColor: palette.surface,
-
-			borderWidth: 1,
-			borderColor: palette.border,
-			borderRadius: 8
-		},
-		heading:
-		{
-			color: palette.heading,
-
-			fontSize: 18,
-			fontWeight: '700' as const
-		},
-		text:
-		{
-			color: palette.text,
-
-			fontSize: 15,
-			lineHeight: 22
-		},
-		muted:
-		{
-			color: palette.muted,
-
-			fontSize: 13
-		},
-		primary:
-		{
-			paddingHorizontal: 14,
-			paddingVertical: 10,
-
-			alignSelf: 'flex-start' as const,
-
-			backgroundColor: palette.accent,
-
-			borderRadius: 8
-		},
-		primaryText:
-		{
-			color: palette.accentText,
-
-			fontSize: 14,
-			fontWeight: '600' as const
-		},
-		success:
-		{
-			color: palette.success,
-
-			fontSize: 13,
-			fontWeight: '600' as const
-		},
-		danger:
-		{
-			color: palette.danger,
-
-			fontSize: 13,
-			fontWeight: '600' as const
-		}
-	};
-}
-
-
-
 function ThemeTest()
 {
-	const { theme, resolvedTheme, setTheme } = useTheme();
-	const system = useColorScheme() ?? 'light';
+	const { theme, scheme, mode, setMode } = useTheme();
 
-	const [result, setResult] = useState('');
+	const styles = useThemedStyles(createStyles);
 
-	const prevTheme = useRef(theme);
-	const prevSystem = useRef(system);
+	const primitiveEntries = useMemo(() => {
+		const entries: Array<{ name: string; color: string }> = [];
 
-	useEffect
-	(
-		() =>
-		{
-			if (prevTheme.current !== theme)
-			{
-				setResult(`theme: ${prevTheme.current} => ${theme}`);
-				prevTheme.current = theme;
+		(Object.keys(palette.brand) as Array<keyof typeof palette.brand>).forEach((key) => {
+			entries.push({ name: `brand.${key}`, color: palette.brand[key] });
+		});
+
+		(Object.keys(palette) as Array<keyof typeof palette>).forEach((key) => {
+			const value = palette[key];
+			if (typeof value === 'string' && value !== palette.transparent) {
+				entries.push({ name: key, color: value });
 			}
-		},
-		[theme]
+		});
+
+		return entries;
+	}, []);
+
+	const gradientEntries = useMemo(
+		() =>
+			(Object.keys(theme.colors.gradients) as Array<keyof typeof theme.colors.gradients>).map(
+				(key) => ({
+					name: key,
+					stops: theme.colors.gradients[key],
+				})
+			),
+		[theme.colors.gradients]
 	);
 
-	useEffect
-	(
-		() =>
-		{
-			if (prevSystem.current !== system)
-			{
-				setResult(`system: ${prevSystem.current} => ${system} (resolvedTheme=${resolvedTheme})`);
-				prevSystem.current = system;
-			}
-		},
-		[system, resolvedTheme]
-	);
-
-	const palette = testPalette[resolvedTheme];
-	const preview = previewStyles(palette);
+	const spacingKeys = Object.keys(theme.spacing) as Array<keyof typeof theme.spacing>;
+	const radiiKeys = Object.keys(theme.radii) as Array<keyof typeof theme.radii>;
+	const opacityKeys = Object.keys(theme.opacity) as Array<keyof typeof theme.opacity>;
+	const iconSizeKeys = Object.keys(theme.iconSizes) as Array<keyof typeof theme.iconSizes>;
 
 	return (
 		<Page title="Theme Test">
-			<Panel>
-				<Text style={styles.heading}>Preview</Text>
-
-				<View style={[local.preview, preview.preview]}>
-					<View style={preview.card}>
-						<Text style={preview.heading}>Card surface</Text>
-						<Text style={preview.text}>This text changes color when the theme is switched.</Text>
-						<Text style={preview.muted}>Secondary text also changes.</Text>
-						<View style={preview.primary}>
-							<Text style={preview.primaryText}>Primary action</Text>
-						</View>
-						<Text style={preview.success}>✓ success state</Text>
-						<Text style={preview.danger}>✕ danger state</Text>
-					</View>
-
-					<View style={local.swatchRow}>
-						<View style={[local.swatch, { backgroundColor: palette.background, borderColor: palette.border }]}>
-							<Text style={[local.swatchLabel, { color: palette.text }]}>bg</Text>
-						</View>
-						<View style={[local.swatch, { backgroundColor: palette.surface, borderColor: palette.border }]}>
-							<Text style={[local.swatchLabel, { color: palette.heading }]}>surface</Text>
-						</View>
-						<View style={[local.swatch, { backgroundColor: palette.accent, borderColor: palette.border }]}>
-							<Text style={[local.swatchLabel, { color: palette.accentText }]}>accent</Text>
-						</View>
-						<View style={[local.swatch, { backgroundColor: palette.success, borderColor: palette.border }]}>
-							<Text style={[local.swatchLabel, { color: palette.accentText }]}>success</Text>
-						</View>
-						<View style={[local.swatch, { backgroundColor: palette.danger, borderColor: palette.border }]}>
-							<Text style={[local.swatchLabel, { color: palette.accentText }]}>danger</Text>
-						</View>
-					</View>
-
-					<View style={[local.chip, { backgroundColor: palette.surface, borderColor: palette.accent }]}>
-						<Text style={[local.chipText, { color: palette.accent }]}>chip · accent border</Text>
+			<View style={styles.container}>
+				{/* 1. Theme Mode Switcher */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Theme Mode</Text>
+					<Text style={styles.metaText}>
+						scheme: {scheme} · mode: {mode}
+					</Text>
+					<View style={styles.rowWrap}>
+						{MODES.map((item) => {
+							const active = mode === item;
+							return (
+								<Pressable
+									key={item}
+									accessibilityRole="button"
+									accessibilityState={{ selected: active }}
+									onPress={() => setMode(item)}
+									style={[styles.modeChip, active && styles.modeChipActive]}
+								>
+									<Text
+										style={[
+											styles.modeChipLabel,
+											active && styles.modeChipLabelActive,
+										]}
+									>
+										{item}
+									</Text>
+								</Pressable>
+							);
+						})}
 					</View>
 				</View>
-			</Panel>
 
-			<Panel>
-				<Text style={styles.heading}>State</Text>
-				<Text selectable style={local.code}>{JSON.stringify({ theme, resolvedTheme, system }, null, 2)}</Text>
-			</Panel>
+				{/* 2. Semantic Colors */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Semantic colors</Text>
+					{COLOR_GROUPS.map((group) => {
+						const groupTokens = theme.colors[group];
+						const roles = Object.keys(groupTokens) as Array<keyof typeof groupTokens>;
 
-			<Panel>
-				<Text style={styles.heading}>Switcher</Text>
-				<ThemeSwitcher/>
-				<Button title="Set light" secondary={theme !== 'light'} onPress={() => setTheme('light')}/>
-				<Button title="Set dark" secondary={theme !== 'dark'} onPress={() => setTheme('dark')}/>
-				<Button title="Set system" secondary={theme !== 'system'} onPress={() => setTheme('system')}/>
-			</Panel>
+						return (
+							<View key={group} style={styles.groupBlock}>
+								<Text style={styles.groupTitle}>{group}</Text>
+								<View style={styles.rowWrap}>
+									{roles.map((role) => (
+										<View key={String(role)} style={styles.swatchCard}>
+											<View
+												style={[
+													styles.swatchFill,
+													{ backgroundColor: groupTokens[role] },
+												]}
+											/>
+											<Text style={styles.captionText}>{String(role)}</Text>
+										</View>
+									))}
+								</View>
+							</View>
+						);
+					})}
 
-			<Panel>
-				<Text style={styles.heading}>Persistence</Text>
-				<Text style={styles.muted}>Current theme: {theme}</Text>
-				<Button title="Back to home" secondary onPress={() => router.replace('/')}/>
-			</Panel>
+					<View style={styles.groupBlock}>
+						<Text style={styles.groupTitle}>gradients</Text>
+						{gradientEntries.map((grad) => (
+							<View key={grad.name} style={styles.gradientBlock}>
+								<Text style={styles.captionText}>{grad.name}</Text>
+								<View style={styles.gradientStrip}>
+									{grad.stops.map((stopColor) => (
+										<View
+											key={`${grad.name}-${stopColor}`}
+											style={[
+												styles.gradientStop,
+												{ backgroundColor: stopColor },
+											]}
+										/>
+									))}
+								</View>
+							</View>
+						))}
+					</View>
+				</View>
 
-			<Panel>
-				<Text style={styles.heading}>Result</Text>
-				<Text selectable style={local.code}>{result || '(empty)'}</Text>
-			</Panel>
+				{/* 3. Typography */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Typography</Text>
+					{TYPOGRAPHY_ROLES.map((role) => (
+						<View key={role} style={styles.typographyRow}>
+							<Text style={styles.captionText}>{role}</Text>
+							<Text style={[theme.typography[role], styles.typographySample]}>
+								Flenta 1 234,56 ₴
+							</Text>
+						</View>
+					))}
+				</View>
+
+				{/* 4. Spacing */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Spacing</Text>
+					{spacingKeys.map((key) => {
+						const value = theme.spacing[key];
+						return (
+							<View key={key} style={styles.spacingRow}>
+								<Text style={styles.captionText}>
+									{key} ({value}px)
+								</Text>
+								<View style={[styles.spacingBar, { width: value }]} />
+							</View>
+						);
+					})}
+				</View>
+
+				{/* 5. Radii */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Radii</Text>
+					<View style={styles.rowWrap}>
+						{radiiKeys.map((key) => {
+							const value = theme.radii[key];
+							return (
+								<View
+									key={key}
+									style={[styles.radiusBox, { borderRadius: value }]}
+								>
+									<Text style={styles.captionText}>
+										{key} ({value})
+									</Text>
+								</View>
+							);
+						})}
+					</View>
+				</View>
+
+				{/* 6. Opacity & Icon Sizes */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Opacity & Icon Sizes</Text>
+					<View style={styles.rowWrap}>
+						{opacityKeys.map((key) => (
+							<View key={key} style={styles.scalePill}>
+								<Text style={styles.captionText}>
+									opacity.{key}: {theme.opacity[key]}
+								</Text>
+							</View>
+						))}
+						{iconSizeKeys.map((key) => (
+							<View key={key} style={styles.scalePill}>
+								<Text style={styles.captionText}>
+									icon.{key}: {theme.iconSizes[key]}px
+								</Text>
+							</View>
+						))}
+					</View>
+				</View>
+
+				{/* 7. Primitives */}
+				<View style={styles.section}>
+					<Text style={styles.sectionTitle}>Primitives</Text>
+					<View style={styles.rowWrap}>
+						{primitiveEntries.map((item) => (
+							<View key={item.name} style={styles.swatchCard}>
+								<View
+									style={[
+										styles.swatchFill,
+										{ backgroundColor: item.color },
+									]}
+								/>
+								<Text style={styles.captionText}>{item.name}</Text>
+							</View>
+						))}
+					</View>
+				</View>
+			</View>
 		</Page>
 	);
 }

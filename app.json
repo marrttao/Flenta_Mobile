@@ -9,10 +9,8 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "infoPlist":
-      {
-        "NSAppTransportSecurity":
-        {
+      "infoPlist": {
+        "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true
         }
       }
@@ -47,7 +45,8 @@
       ],
       "expo-secure-store",
       "expo-web-browser",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,

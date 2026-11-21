@@ -1,54 +1,63 @@
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, Text } from 'react-native';
+
+import type { AppTheme, ThemeMode } from '../types';
 
 import { useTranslation } from '../../localization';
 import { useTheme } from '../hooks/useTheme';
-
-import type { Theme } from '../types';
-
+import { useThemedStyles } from '../hooks/useThemedStyles';
 
 
-const OPTIONS: readonly Theme[] = ['light', 'dark', 'system'] as const;
 
-const styles = StyleSheet.create
+const OPTIONS: readonly ThemeMode[] = ['light', 'dark', 'system'] as const;
+
+
+
+const createStyles = (theme: AppTheme) =>
 (
 	{
 		row:
 		{
-			paddingVertical: 8,
-			gap: 8
+			paddingVertical: theme.spacing.xs,
+			gap: theme.spacing.xs,
 		},
-
+		
 		chip:
 		{
-			paddingHorizontal: 14,
-			paddingVertical: 8,
-
+			paddingHorizontal: theme.spacing.md,
+			paddingVertical: theme.spacing.xs,
 			borderWidth: 1,
-			borderRadius: 8
-		},
-		chip_active:
-		{
-			borderWidth: 2
+			borderRadius: theme.radii.sm,
+			borderColor: theme.colors.neutral.divider,
+			backgroundColor: theme.colors.neutral.base,
 		},
 
+		chipActive:
+		{
+			borderWidth: 2,
+			borderColor: theme.colors.action.primary,
+			backgroundColor: theme.colors.action.secondary,
+		},
+		
 		label:
 		{
-			fontSize: 14,
-			fontWeight: '400'
+			...theme.typography.smallButtonText,
+			color: theme.colors.neutral.secondary,
 		},
-		label_active:
+		
+		labelActive:
 		{
-			fontWeight: '700'
-		}
+			...theme.typography.inputLabel,
+			color: theme.colors.action.secondaryText,
+		},
 	}
 );
-
-
 
 function ThemeSwitcher()
 {
 	const { translate } = useTranslation();
-	const { theme, setTheme } = useTheme();
+	const { mode, setMode } = useTheme();
+
+	const styles = useThemedStyles(createStyles);
 
 	return (
 		<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
@@ -57,20 +66,18 @@ function ThemeSwitcher()
 				(
 					(option) =>
 					{
-						const active = theme === option;
+						const active = mode === option;
 
 						return (
-							<Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: active }} onPress={() => setTheme(option)} style={[styles.chip, active && styles.chip_active]}>
-								<Text style={[styles.label, active && styles.label_active]}>{translate(`theme.${option}`)}</Text>
+							<Pressable key={option} accessibilityRole="button" accessibilityState={{ selected: active }} onPress={() => setMode(option)} style={[styles.chip, active && styles.chipActive]} >
+								<Text style={[styles.label, active && styles.labelActive]}>
+									{translate(`theme.${option}`)}
+								</Text>
 							</Pressable>
 						);
-					}
-				)
-			}
+					})}
 		</ScrollView>
 	);
 }
-
-
 
 export { ThemeSwitcher };

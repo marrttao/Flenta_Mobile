@@ -1,17 +1,21 @@
-import { createContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
+
+import type { AppTheme, ColorScheme, ThemeMode } from '../types';
 
 import { storageService, StorageKeys } from '../../../storage';
 
-import type { Theme, ResolvedTheme } from '../types';
-
+import { darkTheme } from '../themes/dark';
+import { lightTheme } from '../themes/light';
 
 
 interface ThemeContextValue
 {
-	theme: Theme;
-	resolvedTheme: ResolvedTheme;
-	setTheme: (theme: Theme) => void;
+	mode: ThemeMode;
+	scheme: ColorScheme;
+	theme: AppTheme;
+
+	setMode: (mode: ThemeMode) => void;
 }
 
 interface ThemeProviderProps
@@ -21,23 +25,29 @@ interface ThemeProviderProps
 
 
 
+const DEFAULT_MODE: ThemeMode = 'system';
+
+
+
+function toColorScheme(rawScheme: unknown): ColorScheme { return rawScheme === 'dark' ? 'dark' : 'light'; }
+function toThemeMode(value: unknown): ThemeMode
+{
+	if (value === 'light' || value === 'dark' || value === 'system') { return value; }
+	return DEFAULT_MODE;
+}
+
+
+
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
-
-
-
-function toResolved(scheme: unknown): ResolvedTheme { return scheme === 'dark' ? 'dark' : 'light'; }
-function toTheme(value: unknown): Theme { return value === 'light' || value === 'dark' || value === 'system' ? value : 'system'; }
-
-
 
 function ThemeProvider({ children }: ThemeProviderProps)
 {
-	const [theme, setThemeState] = useState<Theme>('system');
+	const [mode, setModeState] = useState<ThemeMode>(DEFAULT_MODE);
 
 	const platformScheme: unknown = useColorScheme();
-	const systemTheme: ResolvedTheme = toResolved(platformScheme);
+	const systemScheme: ColorScheme = toColorScheme(platformScheme);
 
-	const userChanged = useRef(false);
+	const userChangedRef = useRef(false);
 
 	useEffect
 	(
@@ -51,9 +61,8 @@ function ThemeProvider({ children }: ThemeProviderProps)
 					try
 					{
 						const stored = await storageService.getItem<unknown>(StorageKeys.THEME);
-						if (active && !userChanged.current) { setThemeState(toTheme(stored)); }
-					}
-					catch {}
+						if (active && !userChangedRef.current) { setModeState(toThemeMode(stored)); }
+					} catch (error: unknown) { console.warn('ThemeProvider: failed to restore theme mode from storage', error); }
 				}
 			)();
 
@@ -62,22 +71,27 @@ function ThemeProvider({ children }: ThemeProviderProps)
 		[]
 	);
 
-	const resolvedTheme: ResolvedTheme = theme === 'system' ? systemTheme : theme;
+	const scheme: ColorScheme = mode === 'system' ? systemScheme : mode;
+	const theme: AppTheme = scheme === 'dark' ? darkTheme : lightTheme;
 
-	const setTheme = (newTheme: Theme) =>
-	{
-		userChanged.current = true;
-		setThemeState(newTheme);
-		void storageService.setItem(StorageKeys.THEME, newTheme).catch(() => {});
-	};
+	const setMode = useCallback
+	(
+		(nextMode: ThemeMode) =>
+		{
+			userChangedRef.current = true;
+			
+			setModeState(nextMode);
+
+			void storageService.setItem(StorageKeys.THEME, nextMode).catch((error: unknown) => { console.warn('ThemeProvider: failed to persist theme mode', error); });
+		},
+		[]
+	);
 
 	const value = useMemo<ThemeContextValue>
 	(
-		() => ({ theme, resolvedTheme, setTheme }),
-		[theme, resolvedTheme]
+		() => ({ mode, scheme, theme, setMode }),
+		[mode, scheme, theme, setMode]
 	);
-
-
 
 	return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

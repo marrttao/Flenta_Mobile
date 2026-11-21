@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import * as SplashScreen from 'expo-splash-screen';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../features/theme/index';
@@ -9,7 +11,14 @@ import { AuthProvider } from '../features/auth/providers/AuthProvider';
 import { KycProvider } from '../features/kyc/providers/KycProvider';
 if (__DEV__) require('../features/testing/registrations');
 
+import { useTheme } from '../features/theme';
+
 import { IdleTimeoutHost } from '../features/auth/components/IdleTimeoutHost';
+import { StatusBar } from 'expo-status-bar';
+
+import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
+
+SplashScreen.preventAutoHideAsync();
 
 
 
@@ -29,25 +38,53 @@ const queryClient = new QueryClient
 
 
 
+
 function RootLayout()
 {
+	const [loaded, error] = useFonts
+	(
+		{
+			'Manrope-Regular':   Manrope_400Regular,
+			'Manrope-Medium':    Manrope_500Medium,
+			'Manrope-SemiBold':  Manrope_600SemiBold,
+			'Manrope-Bold':      Manrope_700Bold,
+			'Manrope-ExtraBold': Manrope_800ExtraBold,
+		}
+	);
+
+	useEffect(() => { if (loaded || error) { SplashScreen.hideAsync(); } }, [loaded, error]);
+
+	if (!loaded && !error) { return null; }
+
 	return (
 		<SafeAreaProvider>
 			<ThemeProvider>
-				<LocalizationProvider>
-					<ToastProvider>
-						<QueryClientProvider client={queryClient}>
-							<AuthProvider>
-								<KycProvider>
-									<Stack screenOptions={{ headerShown: false }}/>
-									<IdleTimeoutHost/>
-								</KycProvider>
-							</AuthProvider>
-						</QueryClientProvider>
-					</ToastProvider>
-				</LocalizationProvider>
+				<ThemedApp/>
 			</ThemeProvider>
 		</SafeAreaProvider>
+	);
+}
+
+function ThemedApp()
+{
+	const { scheme } = useTheme();
+
+	return (
+		<>
+			<StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+			<LocalizationProvider>
+				<ToastProvider>
+					<QueryClientProvider client={queryClient}>
+						<AuthProvider>
+							<KycProvider>
+								<Stack screenOptions={{ headerShown: false }}/>
+								<IdleTimeoutHost/>
+							</KycProvider>
+						</AuthProvider>
+					</QueryClientProvider>
+				</ToastProvider>
+			</LocalizationProvider>
+		</>
 	);
 }
 

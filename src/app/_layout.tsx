@@ -18,7 +18,9 @@ import { StatusBar } from 'expo-status-bar';
 
 import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync().catch((failure: unknown) => {
+	console.warn('Could not keep the native splash screen visible.', failure);
+});
 
 
 
@@ -52,7 +54,15 @@ function RootLayout()
 		}
 	);
 
-	useEffect(() => { if (loaded || error) { SplashScreen.hideAsync(); } }, [loaded, error]);
+	useEffect(() =>
+	{
+		if (loaded || error)
+		{
+			void SplashScreen.hideAsync().catch((failure: unknown) => {
+				console.warn('Could not hide the native splash screen.', failure);
+			});
+		}
+	}, [loaded, error]);
 
 	if (!loaded && !error) { return null; }
 

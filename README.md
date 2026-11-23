@@ -1,5 +1,7 @@
 # Flenta Mobile
 
+Custom launch screen setup: [Українська інструкція для splash screen](docs/SPLASH_SCREEN_UK.md).
+
 React Native + Expo Router client for Flenta_Backend. The integration follows
 Flenta_Desktop/dev: feature API modules, a shared HTTP client, AuthProvider,
 KycProvider, and a storage adapter. Backend owns authentication, profiles,

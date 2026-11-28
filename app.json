@@ -35,14 +35,16 @@
           "root": "src/app"
         }
       ],
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#208AEF",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+    [
+    "expo-splash-screen",
+      {
+        "backgroundColor": "#15151E",
+        "resizeMode": "contain",
+        "dark": {
+          "backgroundColor": "#F7F6FC"
         }
-      ],
+      }
+    ],
       "expo-secure-store",
       "expo-web-browser",
       "expo-status-bar",

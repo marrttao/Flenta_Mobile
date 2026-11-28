@@ -24,6 +24,7 @@ const typography =
 
 	bodyLarge:		 { fontFamily: fonts.regular, fontSize: 18, fontWeight: fontWeights.regular },
 	bodyText:		 { fontFamily: fonts.regular, fontSize: 16, fontWeight: fontWeights.regular },
+	bodySmall:		 { fontFamily: fonts.regular, fontSize: 14, fontWeight: fontWeights.regular },
 	buttonText:		 { fontFamily: fonts.medium, fontSize: 18, fontWeight: fontWeights.medium },
 	smallButtonText: { fontFamily: fonts.medium, fontSize: 16, fontWeight: fontWeights.medium },
 	inputLabel:		 { fontFamily: fonts.medium, fontSize: 16, fontWeight: fontWeights.medium },

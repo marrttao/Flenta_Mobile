@@ -83,6 +83,7 @@ interface ThemeTypography
 
 	bodyLarge: TypographyToken;
 	bodyText: TypographyToken;
+	bodySmall: TypographyToken;
 	buttonText: TypographyToken;
 	smallButtonText: TypographyToken;
 	inputLabel: TypographyToken;

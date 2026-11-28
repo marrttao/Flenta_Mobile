@@ -1,0 +1,1 @@
+export { SplashOverlay } from './screens/SplashOverlay';

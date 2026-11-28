@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import * as SplashScreen from 'expo-splash-screen';
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../features/theme/index';
@@ -16,9 +15,10 @@ import { useTheme } from '../features/theme';
 import { IdleTimeoutHost } from '../features/auth/components/IdleTimeoutHost';
 import { StatusBar } from 'expo-status-bar';
 
-import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
+import * as SplashScreen from 'expo-splash-screen';
+import { SplashOverlay } from '../features/splash';
 
-SplashScreen.preventAutoHideAsync();
+import { useFonts, Manrope_400Regular, Manrope_500Medium, Manrope_600SemiBold, Manrope_700Bold, Manrope_800ExtraBold } from '@expo-google-fonts/manrope';
 
 
 
@@ -51,6 +51,7 @@ function RootLayout()
 			'Manrope-ExtraBold': Manrope_800ExtraBold,
 		}
 	);
+	const [splashDone, setSplashDone] = useState(false);
 
 	useEffect(() => { if (loaded || error) { SplashScreen.hideAsync(); } }, [loaded, error]);
 
@@ -60,6 +61,8 @@ function RootLayout()
 		<SafeAreaProvider>
 			<ThemeProvider>
 				<ThemedApp/>
+				
+				{ !splashDone && (<SplashOverlay logo={require('../../assets/images/logo/logo-light.png')} onFinish={() => setSplashDone(true)}/>) }
 			</ThemeProvider>
 		</SafeAreaProvider>
 	);
